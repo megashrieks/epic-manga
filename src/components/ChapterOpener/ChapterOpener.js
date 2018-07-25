@@ -57,10 +57,11 @@ export default class ChapterOpener extends Component {
 		this.activeChapter = !!this.props.match.params.chapter
 			? this.props.match.params.chapter
 			: 0;
-		if (this.activeChapter > this.props.manga.length - 1)
+		if (this.activeChapter > this.props.manga.length - 1) {
 			this.setState({
 				chapterEnd: true
 			});
+		}
 		else this.loadChapter(this.activeChapter);
 	}
 	changeChapter = increment => () => {
@@ -116,7 +117,7 @@ export default class ChapterOpener extends Component {
 			<Fragment>
 				{!!this.props.manga.length &&
 					this.state.chapterEnd && (
-						<div className="page">
+						<div className="page single">
 							<div className="image-container">
 								End of chapters
 							</div>
@@ -153,7 +154,7 @@ export default class ChapterOpener extends Component {
 						>
 							<i className="fa fa-angle-right" />
 						</div>
-						{this.state.singlePage && (
+						{this.state.singlePage && !this.state.chapterEnd && (
 							<div className="util">
 								{this.state.active +
 									1 +
