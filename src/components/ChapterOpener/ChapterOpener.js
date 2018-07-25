@@ -4,7 +4,24 @@ import Loading from "../Loading/Loading";
 export default class ChapterOpener extends Component {
 	state = {
 		pages: [],
-		chapterEnd: false
+		chapterEnd: false,
+		singlePage: true,
+		active: 0
+	};
+	navigateChapter = e => {
+		if (this.state.singlePage) {
+			if (e.deltaY < 0)
+				this.setState(prev => ({
+					active: Math.max(prev.active - 1, 0)
+				}));
+			if (e.deltaY > 0)
+				this.setState(prev => ({
+					active: Math.min(
+						prev.active + 1,
+						this.props.manga[this.activeChapter].length - 1
+					)
+				}));
+		}
 	};
 	loadPage = (chapter, page) => blob => {
 		let pages = [...this.state.pages];
@@ -40,11 +57,6 @@ export default class ChapterOpener extends Component {
 		this.activeChapter = !!this.props.match.params.chapter
 			? this.props.match.params.chapter
 			: 0;
-		console.log(
-			this.activeChapter,
-			this.props.manga.length - 1,
-			this.activeChapter > this.props.manga.length - 1
-		);
 		if (this.activeChapter > this.props.manga.length - 1)
 			this.setState({
 				chapterEnd: true
@@ -54,14 +66,16 @@ export default class ChapterOpener extends Component {
 	changeChapter = increment => () => {
 		let nextChapter = parseInt(this.activeChapter, 10) + increment;
 		if (nextChapter < 0) return;
-        else this.props.history.push("/" + nextChapter);
-        window.scrollTo(0, 0);
+		else this.props.history.push("/" + nextChapter);
+		window.scrollTo(0, 0);
 	};
 	render() {
 		let chapterImages = [];
 		if (!!this.props.manga.length) {
 			let pages = this.state.pages;
 			chapterImages = pages.map((e, i) => {
+				if (this.state.singlePage && i !== this.state.active)
+					return null;
 				let urlCreator = window.URL || window.webkitURL;
 				let imgsrc = "";
 				if (!e.loading) imgsrc = urlCreator.createObjectURL(e.file);
@@ -70,9 +84,17 @@ export default class ChapterOpener extends Component {
 						key={"chapter-" + this.activeChapter + " page-" + i}
 					>
 						{!this.state.chapterEnd && (
-							<div className="page">
-                                <div className="image-container">
-                                    <Loading loading={e.loading} conditional={true}>
+							<div
+								className={
+									"page" +
+									(!this.state.singlePage ? " single" : "")
+								}
+							>
+								<div className="image-container">
+									<Loading
+										loading={e.loading}
+										conditional={true}
+									>
 										<img
 											src={imgsrc}
 											alt={
@@ -100,17 +122,48 @@ export default class ChapterOpener extends Component {
 							</div>
 						</div>
 					)}
-                {chapterImages}
-                {!!this.props.manga.length &&
-                    <Fragment>
-                        <div className={"prev" + (parseInt(this.activeChapter, 10) - 1 < 0 ? " disabled" : "")} onClick={this.changeChapter(-1)}>
-                            <i className="fa fa-angle-left" />
-                        </div>
-                        <div className={"next" + (parseInt(this.activeChapter, 10) + 1 > this.props.manga.length - 1 ? " disabled" : "")} onClick={this.changeChapter(1)}>
-                            <i className="fa fa-angle-right" />
-                        </div>
-                    </Fragment>
-                }
+				<div
+					style={{ width: "100%", height: "auto" }}
+					onWheel={this.navigateChapter}
+				>
+					{chapterImages}
+				</div>
+				{!!this.props.manga.length && (
+					<Fragment>
+						<div
+							className={
+								"prev" +
+								(parseInt(this.activeChapter, 10) - 1 < 0
+									? " disabled"
+									: "")
+							}
+							onClick={this.changeChapter(-1)}
+						>
+							<i className="fa fa-angle-left" />
+						</div>
+						<div
+							className={
+								"next" +
+								(parseInt(this.activeChapter, 10) + 1 >
+								this.props.manga.length - 1
+									? " disabled"
+									: "")
+							}
+							onClick={this.changeChapter(1)}
+						>
+							<i className="fa fa-angle-right" />
+						</div>
+						{this.state.singlePage && (
+							<div className="util">
+								{this.state.active +
+									1 +
+									" / " +
+									this.props.manga[this.activeChapter || 0]
+										.length}
+							</div>
+						)}
+					</Fragment>
+				)}
 			</Fragment>
 		);
 	}
