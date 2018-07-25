@@ -11,28 +11,32 @@ class App extends Component {
 		let zip = new jszip();
 		zip.loadAsync(buffer, { type: "arraybuffer" }).then(data => {
 			let files = data.files;
-			let prevFolderName = "/";
-			let chapter = -1;
 			let manga = [];
+			let temp = {};
 			for (let file in files) {
 				if (files[file].dir) continue;
 				else {
 					let name_object = files[file].name.split("/");
 					let foldername = name_object[0];
 					let filename = name_object[1];
-					if (foldername !== prevFolderName) {
-						prevFolderName = foldername;
-						++chapter;
-						manga.push([]);
-					}
-					while (parseInt(filename, 10) > manga[chapter].length)
-						manga[chapter].push(-1);
-					manga[chapter][parseInt(filename, 10) - 1] = {
-						loading: true,
-						file: files[file]
+					if (!!!temp[foldername]) temp[foldername] = [];
+					while (parseInt(filename, 10) > temp[foldername].length)
+						temp[foldername].push(-1);
+					temp[foldername][parseInt(filename, 10) - 1] = {
+						loading:true,
+						file:files[file]
 					};
 				}
 			}
+			let temp_keys_array = [];
+			for (let folder in temp) {
+				temp_keys_array.push(folder);
+			}
+			temp_keys_array.sort();
+			for (let j = 0; j < temp_keys_array.length; ++j){
+				manga.push(temp[temp_keys_array[j]]);
+			}
+			console.log(manga);
 			this.setState({
 				manga: manga
 			});
