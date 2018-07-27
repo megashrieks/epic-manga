@@ -66,6 +66,9 @@
 .next{
 	left:95%;
 }
+.prev.mobile,.next.mobile{
+	display:none;
+}
 .util{
 	width:45px;
 	height:45px;

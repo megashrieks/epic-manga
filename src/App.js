@@ -36,7 +36,6 @@ class App extends Component {
 			for (let j = 0; j < temp_keys_array.length; ++j){
 				manga.push(temp[temp_keys_array[j]]);
 			}
-			console.log(manga);
 			this.setState({
 				manga: manga
 			});
